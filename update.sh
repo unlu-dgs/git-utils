@@ -129,7 +129,6 @@ if [ -n "$(type -t ${command})" ] && [ "$(type -t ${command})" = function ]; the
    ${command}
 else
    echo $USAGE
-   list_options
-   exit 0;
+   echo "./update.sh -h para ver los comandos disponibles"
 fi
 
