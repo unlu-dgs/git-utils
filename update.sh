@@ -5,8 +5,18 @@
 # ------------------------------------------------------------------
 
 SUBJECT=update-git-crypt
-VERSION=0.1.0
+VERSION=0.5.0
 USAGE="Usage: update.sh [-h] [-v] pull <host_volume> <guest_volume> <container_name>"
+
+
+# Print all commands
+function list_options {
+    echo "Comandos disponibles"
+    echo "  pull: Ejecuta git pull dentro del container usando git-crypt"
+    echo "  export: Muestra variables de entorno del container"
+    echo "  config: Muestra la configuracion"
+    echo ""
+}
 
 # --- Option processing --------------------------------------------
 while getopts ":vh" optname
@@ -18,6 +28,7 @@ while getopts ":vh" optname
         ;;
       "h")
         echo $USAGE
+        list_options
         exit 0;
         ;;
       "?")
@@ -38,30 +49,56 @@ while getopts ":vh" optname
 shift $(($OPTIND - 1))
 
 cmd=$1
-volume_origin=$2
-volume_guest=$3
-container_name=$4
-command="command_$1"
+
+typeset -A config # init array
+config=( # set default values in config array
+    [volume_dir_host]="/var/gitlab"
+    [volume_dir_guest]="/gitlab"
+    [container_name]="git-crypt"
+)
+
+command="command_${cmd}"
 
 # -----------------------------------------------------------------
 LOCK_FILE=/tmp/${SUBJECT}.lock
 
 if [ -f "$LOCK_FILE" ]; then
-echo "Script is already running"
-exit
+    echo "Script is already running"
+    exit
 fi
 
 # -----------------------------------------------------------------
 trap "rm -f $LOCK_FILE" EXIT
 touch $LOCK_FILE
 
-# -----------------------------------------------------------------
-function command_test {
-    echo "test"
+# Actualiza el repositorio utilizando el container con git-crypt
+function command_pull {
+    #docker run --volume "/home/tomas/Aplicaciones/gitlab":"/gitlab" -w /gitlab git-crypt git pull
+    setting_proxy
+    load_config
+    docker run --volume ${config[volume_dir_host]}:${config[volume_dir_guest]} -w ${config[volume_dir_guest]} -e "http_proxy="${http_proxy} -e "https_proxy="${https_proxy} ${config[container_name]} git pull
 }
 
-function command_ping {
-    echo "ping $param"
+# Testing env vars
+function command_export {
+    docker run -e "http_proxy="${http_proxy} -e "https_proxy="${https_proxy} git-crypt /bin/bash -c export
+}
+
+function command_config {
+    if [ ! -f conf ]; then
+        echo "[INFO]: No existe archivo '`pwd`/conf'. Se utiliza configuracion por defecto. Si desea parametrizar el script, genere un archivo de configuracion a partir de conf.sample, de nombre 'conf'"
+    else
+        echo "Archivo 'conf' encontrado. Variables seteadas:"
+        while read line
+        do
+            if echo $line | grep -F = &>/dev/null
+            then
+                param=$(echo "$line" | cut -d '=' -f 1)
+                value=$(echo "$line" | cut -d '=' -f 2-)
+                echo "$param=$value"
+            fi
+        done < conf
+    fi
 }
 
 function setting_proxy {
@@ -70,15 +107,20 @@ function setting_proxy {
     if [ -z ${https_proxy+x} ]; then export $https_proxy=""; fi
 }
 
-# Actualiza el repositorio utilizando el container con git-crypt
-function command_pull {
-    #docker run --volume "/home/tomas/Aplicaciones/gitlab":"/gitlab" -w /gitlab git-crypt git pull
-    docker run --volume $2:$3 -w $3 -e "http_proxy="${http_proxy} -e "https_proxy="${https_proxy} $4 git pull
-}
-
-# Testing env vars
-function command_export {
-    docker run -e "http_proxy="${http_proxy} -e "https_proxy="${https_proxy} git-crypt /bin/bash -c export
+# Load file config if exist
+function load_config {
+    if [ ! -f conf ]; then
+        echo "[INFO]: No existe archivo `pwd`/conf. Se utiliza configuracion por defecto. Si desea parametrizar el script, genere un archivo de configuracion a partir de conf.sample"
+    else
+        while read line
+        do
+            if echo $line | grep -F = &>/dev/null
+            then
+                varname=$(echo "$line" | cut -d '=' -f 1)
+                config[$varname]=$(echo "$line" | cut -d '=' -f 2-)
+            fi
+        done < conf
+    fi
 }
 
 # -----------------------------------------------------------------
@@ -86,6 +128,8 @@ function command_export {
 if [ -n "$(type -t ${command})" ] && [ "$(type -t ${command})" = function ]; then
    ${command}
 else
-   echo "'${cmd}' is NOT a command";
+   echo $USAGE
+   list_options
+   exit 0;
 fi
 
