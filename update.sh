@@ -101,6 +101,13 @@ function command_config {
     fi
 }
 
+# Muestra por std output el comando que se ejecutara
+function command_print_command {
+    setting_proxy
+    load_config
+    echo "docker run --volume ${config[volume_dir_host]}:${config[volume_dir_guest]} -w ${config[volume_dir_guest]} -e "http_proxy="${http_proxy} -e "https_proxy="${https_proxy} ${config[container_name]} git pull"
+}
+
 function setting_proxy {
     x=""
     if [ -z ${http_proxy+x} ]; then export $http_proxy=""; fi
