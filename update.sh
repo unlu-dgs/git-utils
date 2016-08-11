@@ -54,7 +54,8 @@ typeset -A config # init array
 config=( # set default values in config array
     [volume_dir_host]="/var/gitlab"
     [volume_dir_guest]="/gitlab"
-    [container_name]="git-crypt"
+    [container_name]="unludgs/git-utils"
+    [simmetric_key]="simmetric.key"
 )
 
 command="command_${cmd}"
@@ -106,6 +107,13 @@ function command_print_command {
     setting_proxy
     load_config
     echo "docker run --volume ${config[volume_dir_host]}:${config[volume_dir_guest]} -w ${config[volume_dir_guest]} -e "http_proxy="${http_proxy} -e "https_proxy="${https_proxy} ${config[container_name]} git pull"
+}
+
+
+function command_unlock {
+    setting_proxy
+    load_config
+    docker run --volume ${config[volume_dir_host]}:${config[volume_dir_guest]} -w ${config[volume_dir_guest]} -e "http_proxy="${http_proxy} -e "https_proxy="${https_proxy} ${config[container_name]} git-crypt unlock ${config[simmetric_key]}
 }
 
 function setting_proxy {

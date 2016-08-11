@@ -1,3 +1,4 @@
 volume_dir_host=/var/gitlab
 volume_dir_guest=/gitlab
 container_name=git-crypt
+simmetric_key=simmetric.key
