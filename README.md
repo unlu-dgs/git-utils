@@ -40,6 +40,26 @@ Se asume el repositorio ya clonado.
 
 ## Desencriptar los archivos de forma local
 
+Desde la carpeta de git-utils
+
+```
+./update.sh unlock
+```
+
+El comando no genera salida si tiene exito.
+
+## Actualizar el repositorio desde el contenedor usando git crypt
+
+```
+./update.sh pull
+```
+
+## Loguearse al contenedor con el entorno configurado
+
+```
+./update.sh bash
+```
+
 # Parametros
 
 El script acepta parametrizaciones via un archivo de nombre conf en la raiz. A continuación se detallan los parametros disponibles.
@@ -48,6 +68,20 @@ El script acepta parametrizaciones via un archivo de nombre conf en la raiz. A c
  * `volume_dir_guest`: Path donde se montara `volume_dir_host` dentro del container. Default value: `/gitlab`.
  * `container_name`: El nombre de la imagen del container.
  * `simmetric_key`: Path de la clave simetrica dentro del container. Generalmente se ubica en `volume_dir_guest`.
+
+# Troubleshootings
+
+Se comprobó que el uso de este contenedor genera que desde afuera del mismo no se
+podra utilizar en el repositorio destino el comando git. Esto se debe a que git-crypt
+genera algunos hooks que al no estar instalados en el host, no pueden ser ejecutados.
+
+Se recomienda que para tareas rutinarias, se cree un helper del comando git en
+`update.sh`. Para tareas eventuales, es recomendable loguearse a este container
+usando una consola interactiva:
+
+```
+./update.sh bash
+```
 
 # Builds automaticas
 

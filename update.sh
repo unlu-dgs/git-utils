@@ -16,6 +16,7 @@ function list_options {
     echo "  export: Muestra variables de entorno del container"
     echo "  config: Muestra la configuracion"
     echo "  unlock: Realiza git-crypt unlock desde el contenedor"
+    echo "  bash: Login al container con una sesion bash interactiva, cargado el enviroment"
     echo ""
 }
 
