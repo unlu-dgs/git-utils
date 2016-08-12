@@ -15,6 +15,7 @@ function list_options {
     echo "  pull: Ejecuta git pull dentro del container usando git-crypt"
     echo "  export: Muestra variables de entorno del container"
     echo "  config: Muestra la configuracion"
+    echo "  unlock: Realiza git-crypt unlock desde el contenedor"
     echo ""
 }
 
@@ -80,11 +81,18 @@ function command_pull {
     docker run --volume ${config[volume_dir_host]}:${config[volume_dir_guest]} -w ${config[volume_dir_guest]} -e "http_proxy="${http_proxy} -e "https_proxy="${https_proxy} ${config[container_name]} git pull
 }
 
+# Muestra el status del repositorio
+function command_status {
+    load_config
+    docker run --volume ${config[volume_dir_host]}:${config[volume_dir_guest]} -w ${config[volume_dir_guest]} -e "http_proxy="${http_proxy} -e "https_proxy="${https_proxy} ${config[container_name]} git status
+}
+
 # Testing env vars
 function command_export {
     docker run -e "http_proxy="${http_proxy} -e "https_proxy="${https_proxy} git-crypt /bin/bash -c export
 }
 
+# Imprime en STDOUT la config en base al archivo
 function command_config {
     if [ ! -f conf ]; then
         echo "[INFO]: No existe archivo '`pwd`/conf'. Se utiliza configuracion por defecto. Si desea parametrizar el script, genere un archivo de configuracion a partir de conf.sample, de nombre 'conf'"
@@ -109,7 +117,7 @@ function command_print_command {
     echo "docker run --volume ${config[volume_dir_host]}:${config[volume_dir_guest]} -w ${config[volume_dir_guest]} -e "http_proxy="${http_proxy} -e "https_proxy="${https_proxy} ${config[container_name]} git pull"
 }
 
-
+# Ejecuta la desencriptacion de los archivos via git-crypt unlock
 function command_unlock {
     setting_proxy
     load_config

@@ -36,13 +36,18 @@ $ vim conf
 
 # Forma de uso
 
+Se asume el repositorio ya clonado.
+
+## Desencriptar los archivos de forma local
+
 # Parametros
 
 El script acepta parametrizaciones via un archivo de nombre conf en la raiz. A continuación se detallan los parametros disponibles.
 
  * `volume_dir_host`: Path en el host al repositorio git sobre el cual se desea ejecutar los comandos. Default value: `/var/gitlab`.
  * `volume_dir_guest`: Path donde se montara `volume_dir_host` dentro del container. Default value: `/gitlab`.
- * `container_name`: El nombre de la imagen del container. 
+ * `container_name`: El nombre de la imagen del container.
+ * `simmetric_key`: Path de la clave simetrica dentro del container. Generalmente se ubica en `volume_dir_guest`.
 
 # Builds automaticas
 
