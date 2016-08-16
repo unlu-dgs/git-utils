@@ -85,7 +85,13 @@ function command_pull {
 # Muestra el status del repositorio
 function command_status {
     load_config
-    docker run --volume ${config[volume_dir_host]}:${config[volume_dir_guest]} -w ${config[volume_dir_guest]} -e "http_proxy="${http_proxy} -e "https_proxy="${https_proxy} ${config[container_name]} git status
+    docker run --volume ${config[volume_dir_host]}:${config[volume_dir_guest]} -w ${config[volume_dir_guest]} ${config[container_name]} git status
+}
+
+# Genera una sesion interactiva con el entorno cargado
+function command_bash {
+    load_config
+    docker run -it --volume ${config[volume_dir_host]}:${config[volume_dir_guest]} -w ${config[volume_dir_guest]} ${config[container_name]} -e "http_proxy="${http_proxy} -e "https_proxy="${https_proxy} bash
 }
 
 # Testing env vars
