@@ -91,7 +91,7 @@ function command_status {
 # Genera una sesion interactiva con el entorno cargado
 function command_bash {
     load_config
-    docker run -it --volume ${config[volume_dir_host]}:${config[volume_dir_guest]} -w ${config[volume_dir_guest]} ${config[container_name]} -e "http_proxy="${http_proxy} -e "https_proxy="${https_proxy} bash
+    docker run -it --volume ${config[volume_dir_host]}:${config[volume_dir_guest]} -w ${config[volume_dir_guest]} -e "http_proxy="${http_proxy} -e "https_proxy="${https_proxy} ${config[container_name]} bash
 }
 
 # Testing env vars
